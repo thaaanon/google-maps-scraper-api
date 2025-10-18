@@ -42,17 +42,28 @@ app.get('/scrape', async (req, res) => {
   try {
     console.log('Launching browser...');
     
-    // Launch Puppeteer with optimized settings
-    browser = await puppeteer.launch({
+    // Launch Puppeteer with optimized settings for Render
+    const launchOptions = {
       headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-accelerated-2d-canvas',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-extensions'
       ]
-    });
+    };
+
+    // Use system Chrome if available (for Render)
+    if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+      launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+    }
+
+    browser = await puppeteer.launch(launchOptions);
 
     const page = await browser.newPage();
     
